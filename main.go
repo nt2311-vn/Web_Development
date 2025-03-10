@@ -24,9 +24,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/product/{id:[0-9]+}", pageHandler)
 
-	http.Handle("/", router)
-
-	if err := http.ListenAndServe(":8999", nil); err != nil {
+	if err := http.ListenAndServe(":8999", router); err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
@@ -37,13 +35,13 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Product ID: %s\n", productID)
 
 	fileName := productID + ".html"
-
-	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+	filePath := filepath.Join("var", "www", "product", fileName)
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		log.Println("No such product")
-		fileName = "invalid.html"
+		filePath = filepath.Join("var", "www", "product", "invalid.html")
 	}
 
-	http.ServeFile(w, r, filepath.Join("var", "www", "product", fileName))
+	http.ServeFile(w, r, filePath)
 }
 
 func showInfo(w http.ResponseWriter, r *http.Request) {
