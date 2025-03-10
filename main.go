@@ -14,10 +14,12 @@ func main() {
 	// files := http.FileServer(http.Dir(filepath.Join("var", "www")))
 	// http.Handle("/site/", http.StripPrefix("/site/", fils))
 
-	finalHandler := http.HandlerFunc(final)
-	http.Handle("/", middleware1(middleware2(finalHandler)))
+	// finalHandler := http.HandlerFunc(final)
+	// http.Handle("/", middleware1(middleware2(finalHandler)))
 
-	if err := http.ListenAndServe(":8999", nil); err != nil {
+	mid := &AfterMiddleware{http.HandlerFunc(myHandler)}
+
+	if err := http.ListenAndServe(":8999", mid); err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
