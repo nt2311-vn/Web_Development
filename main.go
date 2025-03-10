@@ -5,7 +5,11 @@ import (
 	"html"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -17,11 +21,29 @@ func main() {
 	// finalHandler := http.HandlerFunc(final)
 	// http.Handle("/", middleware1(middleware2(finalHandler)))
 
-	mid := &AfterMiddleware{http.HandlerFunc(myHandler)}
+	router := mux.NewRouter()
+	router.HandleFunc("/product/{id:[0-9]+}", pageHandler)
 
-	if err := http.ListenAndServe(":8999", mid); err != nil {
+	http.Handle("/", router)
+
+	if err := http.ListenAndServe(":8999", nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
+}
+
+func pageHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	productID := vars["id"]
+	log.Printf("Product ID: %s\n", productID)
+
+	fileName := productID + ".html"
+
+	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+		log.Println("No such product")
+		fileName = "invalid.html"
+	}
+
+	http.ServeFile(w, r, filepath.Join("var", "www", "product", fileName))
 }
 
 func showInfo(w http.ResponseWriter, r *http.Request) {
