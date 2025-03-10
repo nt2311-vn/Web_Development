@@ -5,15 +5,17 @@ import (
 	"html"
 	"log"
 	"net/http"
-	"path/filepath"
 	"time"
 )
 
 func main() {
-	http.HandleFunc("/", showInfo)
+	// http.HandleFunc("/", showInfo)
+	//
+	// files := http.FileServer(http.Dir(filepath.Join("var", "www")))
+	// http.Handle("/site/", http.StripPrefix("/site/", fils))
 
-	files := http.FileServer(http.Dir(filepath.Join("var", "www")))
-	http.Handle("/site/", http.StripPrefix("/site/", files))
+	finalHandler := http.HandlerFunc(final)
+	http.Handle("/", middleware1(middleware2(finalHandler)))
 
 	if err := http.ListenAndServe(":8999", nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
